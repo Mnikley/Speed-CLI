@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "speed-cli"
+version = "0.1.0"
+description = "Effortlessly create descriptive, colorized command line interfaces (CLIs) for your script collections!"
+authors = ["Matthias Ley <matthias.ley@pm.me>"]
+license = "MIT"
+readme = "README.md"
+classifiers = [
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+keywords = ["CLI", "Command Line Interface", "Script Collection Management", "Package Management"]
+repository = "https://github.com/Mnikley/Speed-CLI"
+packages = [{include = "speed_cli", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
