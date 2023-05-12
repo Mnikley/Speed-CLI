@@ -5,7 +5,7 @@ Simplify script and package management by quickly creating a CLI that automatica
 your functions. Get an instant understanding of your collection without diving into extensive documentation. 
 Customize descriptions and add informative text, making script interaction easy without remembering all the details.
 
-![speed_cli_showcase](https://github.com/Mnikley/Speed-CLI/assets/75040444/12f8506b-a78c-4feb-ac8e-8d56202d23e8)
+![speed_cli_showcase](https://github.com/Mnikley/Speed-CLI/assets/75040444/53f87e4b-8c88-47cd-81a1-04cbedb41769)
 
 ## Basic Usage
 ```
@@ -18,7 +18,7 @@ CLI(menu=[
     test_func_three
 ])
 ```
-and that's it! With a `your_package.py` file looking like this:
+and that's it! With an example `your_package.py` file looking like this:
 ```
 def test_func():
     print("K")
@@ -31,7 +31,7 @@ def test_func_three(my_num: int = 5, my_str: str = 'fredl') -> str:
 ```
 this would give you an interactive prompt like this:
 
-![image](https://github.com/Mnikley/Speed-CLI/assets/75040444/968962f1-b54a-416b-b602-b5bb45ff1778)
+![cli_green](https://github.com/Mnikley/Speed-CLI/assets/75040444/0a121305-6f07-447b-89af-b335b4388192)
 
 .. of course, you can always modify your CLI and make it more fancy and descriptive! Lets say i want to give 
 the second function some more description, and add custom fields:
@@ -52,7 +52,17 @@ the second function some more description, and add custom fields:
 ```
 would give you:
 
-![image](https://github.com/Mnikley/Speed-CLI/assets/75040444/e83422f5-82cf-459c-9e4a-3a534195bb3c)
+![cli_blue](https://github.com/Mnikley/Speed-CLI/assets/75040444/e7443c5e-fbb5-4a1f-917a-c08cd99e8d41)
+
+.. you can also add default arguments for your functions:
+```
+def test_func(some_str=None, some_int=None):
+    print(f"K {some_str} {some_int}")
+
+CLI(menu=[
+    MenuEntry(func=test_func, args=["fredi", 10])
+])
+```
 
 .. the `Color` class also allows you to simply use colored texts in your prints:
 ```
@@ -64,7 +74,7 @@ print(f"I like {c.colorize('colors')} to {c.colorize('emphasize', color='green',
 ```
 gives you:
 
-![image](https://github.com/Mnikley/Speed-CLI/assets/75040444/b3c1b06a-56e5-4d27-913e-c966c4c8f524)
+![color](https://github.com/Mnikley/Speed-CLI/assets/75040444/73853adb-5119-49f7-99b4-f6a7b96495bf)
 
 # TODO:
 - currently only accepts strings as arguments, conversions have to be done in underlying function; convert based on types if given

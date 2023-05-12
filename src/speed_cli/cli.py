@@ -107,11 +107,13 @@ class MenuEntry:
     func = None
     show_signature = None
 
-    def __init__(self, func=None, show_signature: bool = True, **kwargs) -> None:
+    def __init__(self, func=None, show_signature: bool = True, *args, **kwargs) -> None:
         self.func = func
         self.show_signature = show_signature
         self.function = func.__name__
-        self.kwargs = kwargs
+        self.kwargs = {k: v for k, v in kwargs.items() if k != "args"}
+        self.args = [arg for arg in args]
+        self.args.extend([lv for k, v in kwargs.items() if k == "args" for lv in v])
 
     def get_signature(self, col: Color = None, padding: str = "") -> str:
         """Get the signature of a function, colorize, add padding"""
@@ -142,7 +144,7 @@ class CLI:
     def __init__(self, color: str = "green",
                  header: str = "Speed CLI",
                  menu: list = None,
-                 *args,
+                 *input_args,
                  **kwargs) -> None:
         if not menu:
             raise ValueError("""No menu defined! Sample usage:\ncli = CLI(
@@ -160,7 +162,6 @@ class CLI:
         for idx, entry in enumerate(menu):
             if callable(entry):
                 menu[idx] = MenuEntry(func=entry)
-            # menu[idx].function = entry.__name__
         c = Color(color, **kwargs)
 
         # mainloop for CLI
@@ -201,8 +202,8 @@ class CLI:
                     print("\n" + c.colorize(f'No function defined for MenuEntry #{selection_idx}!',
                                             color='red') + "\n")
                 else:
-                    # execution with args
-                    args = []
+                    # execution with input_args
+                    input_args = []
                     kwargs = {}
                     for sarg in selection_args:
                         sarg = sarg.lstrip('"').rstrip('"')
@@ -210,10 +211,13 @@ class CLI:
                             kwarg_key, kwarg_val = sarg.split("=")
                             kwargs[kwarg_key] = kwarg_val
                         else:
-                            args.append(sarg)
+                            input_args.append(sarg)
                     print(c.create_separator())
                     try:
-                        menu_entry.func(*args, **kwargs)
+                        # arguments = []
+                        # if entry.arguments:
+                        #     arguments = entry.arguments
+                        menu_entry.func(*menu_entry.args, *input_args, **kwargs)
                     except Exception as e:
                         print(c.colorize('Function call failed!', color='red'))
                         print(e)
@@ -223,13 +227,3 @@ class CLI:
                 break
             else:
                 print(f"\n{c.colorize(f'Illegal selection: {selection_idx}!', color='red')}\n")
-
-
-from math import sqrt
-
-def test_func():
-    print("K")
-
-
-if __name__ == "__main__":
-    CLI(menu=[test_func, sqrt])
