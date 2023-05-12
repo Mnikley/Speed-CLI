@@ -1,3 +1,5 @@
+![PyPI](https://img.shields.io/pypi/v/speed-cli) 
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/speed-cli)
 # Speed-CLI
 Effortlessly create descriptive, colorized command line interfaces (CLIs) for your script collections!
 
