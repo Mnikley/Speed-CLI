@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "speed-cli"
-version = "0.1.0"
+version = "0.1.1"
 description = "Effortlessly create descriptive, colorized command line interfaces (CLIs) for your script collections!"
 authors = ["Matthias Ley <matthias.ley@pm.me>"]
 license = "MIT"
