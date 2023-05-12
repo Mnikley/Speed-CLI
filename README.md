@@ -1,13 +1,17 @@
 ![PyPI](https://img.shields.io/pypi/v/speed-cli) 
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/speed-cli)
-# Speed-CLI
-Effortlessly create descriptive, colorized command line interfaces (CLIs) for your script collections!
+![logo](https://github.com/Mnikley/Speed-CLI/assets/75040444/ee292fe6-905e-4188-b876-0c5f1710e9c4)
 
 Simplify script and package management by quickly creating a CLI that automatically parses arguments and returns of 
 your functions. Get an instant understanding of your collection without diving into extensive documentation. 
 Customize descriptions and add informative text, making script interaction easy without remembering all the details.
 
 ![speed_cli_showcase](https://github.com/Mnikley/Speed-CLI/assets/75040444/53f87e4b-8c88-47cd-81a1-04cbedb41769)
+
+## Install
+``` 
+pip install speed-cli
+```
 
 ## Basic Usage
 ```
