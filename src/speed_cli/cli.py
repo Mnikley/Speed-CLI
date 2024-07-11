@@ -150,16 +150,30 @@ class CLI:
                  *input_args,
                  **kwargs) -> None:
         if not menu:
-            exit("""No menu defined! Sample usage:\ncli = CLI(
-    color="green",
-    header="My CLI",
-    menu=[
-        MenuEntry(func=your_func,
-                  title="My great function",
-                  desc="Does this and that!"),
-        MenuEntry(func=your_other_func, show_signature=False)
-    ]
-)""")
+            exit("""No menu defined! Sample usage:
+from speed_cli.cli import CLI, MenuEntry
+
+
+def test_func():
+    print("foo")
+
+
+def test_other_func(some_val: int = 5):
+    print(f"bar: {some_val}")
+
+
+def z_test_func():
+    print("By naming, this function is last!")
+
+
+cli = CLI(menu=[
+    MenuEntry(func=test_func),
+    MenuEntry(func=test_other_func, function_name_override="also a test function"),
+    MenuEntry(func=test_other_func, function_name_override="same function as above with hidden signature",
+              show_signature=False),
+    MenuEntry(func=z_test_func, priority=1),
+])""")
+
         # in case menu is only functions, convert
         for idx, entry in enumerate(menu):
             if callable(entry):
