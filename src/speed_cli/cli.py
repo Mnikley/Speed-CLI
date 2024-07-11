@@ -1,6 +1,5 @@
 from typing import Optional
 from inspect import signature, Parameter
-import time
 
 
 class Color:
@@ -106,11 +105,15 @@ class MenuEntry:
     """Class for Menu entries"""
     func = None
     show_signature = None
+    priority = None
+    name = None
 
-    def __init__(self, func=None, show_signature: bool = True, *args, **kwargs) -> None:
+    def __init__(self, func=None, show_signature: bool = True, priority: int = None, function_name_override=None,
+                 *args, **kwargs) -> None:
         self.func = func
         self.show_signature = show_signature
-        self.function = func.__name__
+        self.priority = priority
+        self.function = function_name_override if function_name_override else func.__name__
         self.kwargs = {k: v for k, v in kwargs.items() if k != "args"}
         self.args = [arg for arg in args]
         self.args.extend([lv for k, v in kwargs.items() if k == "args" for lv in v])
@@ -147,7 +150,7 @@ class CLI:
                  *input_args,
                  **kwargs) -> None:
         if not menu:
-            raise ValueError("""No menu defined! Sample usage:\ncli = CLI(
+            exit("""No menu defined! Sample usage:\ncli = CLI(
     color="green",
     header="My CLI",
     menu=[
@@ -157,73 +160,82 @@ class CLI:
         MenuEntry(func=your_other_func, show_signature=False)
     ]
 )""")
-
         # in case menu is only functions, convert
         for idx, entry in enumerate(menu):
             if callable(entry):
                 menu[idx] = MenuEntry(func=entry)
-        c = Color(color, **kwargs)
 
-        # mainloop for CLI
+        self.menu = sorted(menu, key=lambda x: float("inf") if x.priority is None else x.priority)
+        self.c = Color(color, **kwargs)
+        self.header = header
+        self._run_mainloop()
+
+    def _run_mainloop(self):
         while True:
-            # minimal length for [menu index] + argument name
-            menu_idx_buffer = len(str(len(menu))) + 6
-            min_len = max([len(_l) for _ in menu for _l in _.kwargs.keys()] + [5]) + menu_idx_buffer
+            entries = self._iterate_menu_entries()
+            selection = input(f"{self.c.create_header(self.header)}" + entries
+                              + f"{self.c.create_index('x')} exit\n{self.c.create_prompt()}")
 
-            # iterate over MenuEntries
-            entries = ""
-            for idx, entry in enumerate(menu):
-                header_just = c.ljustify(f"{c.create_index(idx + 1)} {c.colorize('Function:')}", min_len)
-
-                # iterate over arguments within MenuEntry
-                entries += f"{header_just} {entry.function}"
-
-                # iterate over kwargs within MenuEntry
-                for key, val in entry.kwargs.items():
-                    key_just = c.ljustify(
-                        f"{' ' * (len(str(idx + 1)) + 3)}{c.colorize(key.title() + ':')}", min_len)
-                    entries += f"\n{key_just} {val}"
-                entries += "\n"
-
-                # get signature arguments
-                sig = entry.get_signature(c, f"{' ' * (len(str(idx + 1)) + 3)}")
-                if sig:
-                    entries += sig + "\n"
-
-            # input loop
-            selection = input(f"{c.create_header(header)}" + entries
-                              + f"{c.create_index('x')} exit\n{c.create_prompt()}")
-
-            # input handling
             selection_idx, *selection_args = selection.split(" ")
-            if selection_idx in [str(_) for _ in range(len(menu) + 1)]:
-                menu_entry = menu[int(selection_idx) - 1]
-                if not menu_entry.func:
-                    print("\n" + c.colorize(f'No function defined for MenuEntry #{selection_idx}!',
-                                            color='red') + "\n")
-                else:
-                    # execution with input_args
-                    input_args = []
-                    kwargs = {}
-                    for sarg in selection_args:
-                        sarg = sarg.lstrip('"').rstrip('"')
-                        if "=" in sarg:
-                            kwarg_key, kwarg_val = sarg.split("=")
-                            kwargs[kwarg_key] = kwarg_val
-                        else:
-                            input_args.append(sarg)
-                    print(c.create_separator())
-                    try:
-                        # arguments = []
-                        # if entry.arguments:
-                        #     arguments = entry.arguments
-                        menu_entry.func(*menu_entry.args, *input_args, **kwargs)
-                    except Exception as e:
-                        print(c.colorize('Function call failed!', color='red'))
-                        print(e)
-                time.sleep(2)
-                print(c.create_separator())
+            if selection_idx in [str(_) for _ in range(len(self.menu) + 1)]:
+                self._handle_input(idx=selection_idx, selection_args=selection_args)
             elif selection_idx.lower() == "x":
                 break
             else:
-                print(f"\n{c.colorize(f'Illegal selection: {selection_idx}!', color='red')}\n")
+                print(f"\n{self.c.colorize(f'Illegal selection: {selection_idx}!', color='red')}\n")
+
+    def _iterate_menu_entries(self) -> str:
+        min_len = self._get_min_menu_idx_len()
+
+        entries = ""
+        for idx, entry in enumerate(self.menu):
+            header_just = self.c.ljustify(f"{self.c.create_index(idx + 1)} {self.c.colorize('Function:')}", min_len)
+
+            # iterate over arguments within MenuEntry
+            entries += f"{header_just} {entry.function}"
+
+            # iterate over kwargs within MenuEntry
+            for key, val in entry.kwargs.items():
+                key_just = self.c.ljustify(
+                    f"{' ' * (len(str(idx + 1)) + 3)}{self.c.colorize(key.title() + ':')}", min_len)
+                entries += f"\n{key_just} {val}"
+            entries += "\n"
+
+            # get signature arguments
+            sig = entry.get_signature(self.c, f"{' ' * (len(str(idx + 1)) + 3)}")
+            if sig:
+                entries += sig + "\n"
+        return entries
+
+    def _get_min_menu_idx_len(self) -> int:
+        # minimal length for [menu index] + argument name
+        menu_idx_buffer = len(str(len(self.menu))) + 6
+        return max([len(_l) for _ in self.menu for _l in _.kwargs.keys()] + [5]) + menu_idx_buffer
+
+    def _handle_input(self, idx: str, selection_args: list) -> None:
+        menu_entry = self.menu[int(idx) - 1]
+        if not menu_entry.func:
+            print("\n" + self.c.colorize(f'No function defined for MenuEntry #{idx}!',
+                                         color='red') + "\n")
+        else:
+            # execution with input_args
+            input_args = []
+            kwargs = {}
+            for sarg in selection_args:
+                sarg = sarg.lstrip('"').rstrip('"')
+                if "=" in sarg:
+                    kwarg_key, kwarg_val = sarg.split("=")
+                    kwargs[kwarg_key] = kwarg_val
+                else:
+                    input_args.append(sarg)
+            print(self.c.create_separator())
+            try:
+                # arguments = []
+                # if entry.arguments:
+                #     arguments = entry.arguments
+                menu_entry.func(*menu_entry.args, *input_args, **kwargs)
+            except Exception as e:
+                print(self.c.colorize('Function call failed!', color='red'))
+                print(e)
+
+        print(self.c.create_separator())
